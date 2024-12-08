@@ -9,7 +9,6 @@ using System.Windows.Interop;
 using System.Windows;
 using System.Reflection;
 
-// 共享dll和exe的id好像有范围限制，要探究。
 namespace XamlPearls.GlobalKeyShorts
 {
     public static class WindowEx
@@ -18,21 +17,6 @@ namespace XamlPearls.GlobalKeyShorts
 
         private static List<(int id, Action<HotKeyModel> action, HotKeyModel model)> _hotKeyInfos;
 
-        /// <summary>
-        /// 快捷键的ID的范围必须是0X0000-0XFFFF，且在dll和exe中的范围也不同。
-        /// </summary>
-        /// <returns></returns>
-        private static int GetHotkeyId()
-        {
-            var available = _hotKeyInfos.Where(item => item.id >= 0x0000 && item.id <= 0xFFFF).OrderBy(item => item.id).FirstOrDefault(item => !_hotKeyInfos.Any(item2 => item2.id == item.id + 1));
-            var id = available == default ? 0x0000 : available.id + 1;
-            if (id > 0XFFFF)
-            {
-                throw new ArgumentOutOfRangeException(nameof(id), "Please always unregister hotkey before the window closes.");
-            }
-            return id;
-        }
-
         static WindowEx()
         {
             _hotKeyInfos = new List<(int id, Action<HotKeyModel> action, HotKeyModel model)>();
@@ -40,12 +24,6 @@ namespace XamlPearls.GlobalKeyShorts
 
         public static bool RegisterGlobalHotKey(this Window window, HotKeyModel hotKeyModel, Action<HotKeyModel> action) // action在创建window的线程上执行
         {
-            window.SourceInitialized += (object sender, EventArgs e) =>
-            {
-
-            };
-            window.Closed += Window_Closed;
-
             if (string.IsNullOrWhiteSpace(hotKeyModel.Name))
             {
                 throw new ArgumentException("Hotkey name can't be whitespace or null.", nameof(hotKeyModel));
@@ -79,39 +57,46 @@ namespace XamlPearls.GlobalKeyShorts
             if (isSuccess)
             {
                 _hotKeyInfos.Add((id, action, hotKeyModel));
+                window.Closed += (object sender, EventArgs e) =>
+                {
+                    if (!UnregisterGlobalHotKey(m_Hwnd, hotKeyModel.Name))
+                    {
+                        throw new InvalidOperationException($"Failed to unregister hotkey {hotKeyModel.Name}.");
+                    }
+                };
             }
+
             return isSuccess;
         }
 
-        private static void Window_Closed(object sender, EventArgs e)
+        private static int GetHotkeyId()
         {
-            throw new NotImplementedException();
+            var available = _hotKeyInfos.Where(item => item.id >= 0x0000 && item.id <= 0xFFFF).OrderBy(item => item.id).FirstOrDefault(item => !_hotKeyInfos.Any(item2 => item2.id == item.id + 1));
+            var id = available == default ? 0x0000 : available.id + 1;
+            if (id > 0XFFFF)
+            {
+                throw new ArgumentOutOfRangeException(nameof(id), "Please always unregister hotkey before the window closes.");
+            }
+            return id;
         }
 
-        private static void Window_SourceInitialized(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool RegisterHotKey(IntPtr hWnd, int id, ModifierKeys modifiers, int vk);
 
-        public static bool UnregisterGlobalHotKey(this Window window, string name)
+        private static bool UnregisterGlobalHotKey(IntPtr window, string name)
         {
             var index = _hotKeyInfos.FindIndex(item => item.model.Name == name);
             if (index == -1)
             {
                 throw new ArgumentException($"{name} doesn't exist.");
             }
-
-            var m_Hwnd = new WindowInteropHelper(window).Handle;
-            bool isSuccess = UnregisterHotKey(m_Hwnd, _hotKeyInfos[index].id) != 0;
+            bool isSuccess = UnregisterHotKey(window, _hotKeyInfos[index].id) != 0;
             if (isSuccess)
             {
                 _hotKeyInfos.RemoveAt(index);
             }
             return isSuccess;
         }
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool RegisterHotKey(IntPtr hWnd, int id, ModifierKeys modifiers, int vk);
 
         [DllImport("user32.dll", SetLastError = true)]
         private static extern int UnregisterHotKey(IntPtr hWnd, int id);
