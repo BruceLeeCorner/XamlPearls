@@ -115,6 +115,7 @@ namespace XamlPearls
     }
 
     #region Help class
+
     /// <summary>
     /// Extension methods for <see cref="IEnumerable&lt;T&gt;"/>
     /// </summary>
