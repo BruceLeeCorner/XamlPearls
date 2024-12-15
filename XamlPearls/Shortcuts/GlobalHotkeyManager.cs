@@ -85,7 +85,7 @@ namespace XamlPearls.Shortcuts
             _hotKeyInfos.Add((id, window, m_Hwnd, action, hotKeyModel));
             window.Closed += (object sender, EventArgs e) =>
             {
-                if (GetAllHotkeys().Any(item => item.Name == hotKeyModel.Name))
+                if(GetAllHotkeys().Any(item => item.Name == hotKeyModel.Name))
                 {
                     UnregisterGlobalHotKey(hotKeyModel.Name);
                 }
