@@ -94,7 +94,19 @@ namespace XamlPearls
                             bool match = true;
                             for (int i = 0; i < parameterInfos.Length; i++)
                             {
-                                if (!Parameters[i].Value.GetType().IsAssignableFrom(parameterInfos[i].ParameterType))
+                                if (Parameters[i].Value == null)
+                                {
+                                    if (!parameterInfos[i].ParameterType.IsClass && Nullable.GetUnderlyingType(parameterInfos[i].ParameterType) == null)
+                                    {
+                                        match = false;
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        continue;
+                                    }
+                                }
+                                else if (!parameterInfos[i].ParameterType.IsAssignableFrom(Parameters[i].Value.GetType()))
                                 {
                                     match = false;
                                     break;
