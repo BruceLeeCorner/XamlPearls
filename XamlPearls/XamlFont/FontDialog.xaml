@@ -1,0 +1,51 @@
+﻿<Window
+    x:Class="XamlPearls.XamlFont.FontDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:XamlPearls.XamlFont"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="{DynamicResource WindowTitle}"
+    Icon="Resources/colorfont_icon.png"
+    Loaded="Window_Loaded_1"
+    ResizeMode="NoResize"
+    SizeToContent="WidthAndHeight"
+    WindowStartupLocation="CenterOwner">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="I18n/en-US.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <local:FontPicker
+            x:Name="colorFontChooser"
+            Grid.Row="0"
+            Margin="2,0" />
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,40,50,20"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Name="btnOk"
+                Width="100"
+                Margin="0,0,20,0"
+                Padding="0,5"
+                Click="btnOk_Click"
+                Content="{DynamicResource Ok}"
+                IsDefault="True" />
+            <Button
+                Width="100"
+                Margin="20,0,0,0"
+                Padding="0,5"
+                Content="{DynamicResource Cancel}"
+                IsCancel="True" />
+        </StackPanel>
+    </Grid>
+</Window>
