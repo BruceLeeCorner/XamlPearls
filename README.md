@@ -37,12 +37,10 @@
 protected override void OnSourceInitialized(EventArgs e)
 {
     base.OnSourceInitialized(e);
-
-    GlobalHotkeyManager.RegisterGlobalHotKey(new HotKeyModel("hotkey1", true, false, true, false, Keys.A), (model) =>
+    this.GlobalHotkeyManager.RegisterGlobalHotKey(new HotKeyModel("hotkey1", true, false, true, false, Keys.A), (model) =>
     {
         MessageBox.Show(JsonSerializer.Serialize(model));
-    }, this
-    );
+    });
 }
 ```
 
@@ -61,13 +59,12 @@ IEnumerable<HotKeyModel> models = GlobalHotkeyManager.GetAllHotkeys();
 IEnumerable<HotKeyModel> models = GlobalHotkeyManager.GetHotkeysOnWindow(this);
 ```
 
-- 重复注册一个已经被注册过的快捷键会失败。
-    - 比如Tencent QQ已经注册Ctrl + Alt +A 用于截图，如果我们开发的application再注册Ctrl + Alt + A会失败。
-    - 比如我们开发的Application已经注册了Ctrl + UP，再在Application中注册Ctrl + UP会失败。
+- 快捷键事件处理程序`action`在创建window的UI 线程上执行，应当妥善处理它可能抛出的异常，避免导致UI线程崩溃。
+- 其他进程或当前进程已经注册的快捷键，重复注册会失败。
 - 如果多个进程使用相同的快捷键，先启动的先占用，后来者失败。
-- 一个进程只能取消本进程已经注册的快捷键，无法取消另外一个进程的快捷键。
-- 快捷键事件处理程序`action`在创建window的UI线程上执行，应当妥善处理它可能抛出的异常，避免导致UI线程崩溃。
-- 开发者可以随时手动注销快捷键，也可以不用关心，快捷键会在窗口关闭时自动注销
+- 一个进程只能注销本进程已经注册的快捷键，无法注销另外一个进程的快捷键。
+- 开发者可以随时注销已经注册的快捷键，也可以不用关心，`快捷键会在窗口关闭时自动注销`。
+- 一般是在主窗体的OnSourceInitialized注册快捷键，只要主窗体没被关闭，快捷键一直有效。
 
 
 
