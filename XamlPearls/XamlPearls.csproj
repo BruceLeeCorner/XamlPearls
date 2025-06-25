@@ -3,7 +3,7 @@
 		<TargetFrameworks>net452;net6.0-windows</TargetFrameworks>
 		<Nullable>disable</Nullable>
 		<UseWPF>true</UseWPF>
-		<Version>1.1.0-beta1</Version>
+		<Version>1.1.0</Version>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 	<ItemGroup>
